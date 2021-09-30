@@ -23,11 +23,15 @@ import {
 } from './helpers/accounts';
 import { Config } from './types';
 import { upload } from './commands/upload';
+import { verifyTokenMetadata } from './commands/verifyTokenMetadata';
+import { generateConfigurations } from './commands/generateConfigurations';
 import { loadCache, saveCache } from './helpers/cache';
 import { mint } from './commands/mint';
 import { signMetadata } from './commands/sign';
 import { signAllMetadataFromCandyMachine } from './commands/signAll';
 import log from 'loglevel';
+import { createMetadataFiles } from './helpers/metadata';
+import { createGenerativeArt } from './commands/createArt';
 
 program.version('0.0.2');
 
@@ -52,11 +56,11 @@ programCommand('upload')
     'arweave',
   )
   .option(
-    '--ipfs-infura-project-id',
+    '--ipfs-infura-project-id <string>',
     'Infura IPFS project id (required if using IPFS)',
   )
   .option(
-    '--ipfs-infura-secret',
+    '--ipfs-infura-secret <string>',
     'Infura IPFS scret key (required if using IPFS)',
   )
   .option('--no-retain-authority', 'Do not retain authority to update metadata')
@@ -138,8 +142,33 @@ programCommand('upload')
       `ended at: ${new Date(endMs).toISOString()}. time taken: ${timeTaken}`,
     );
     if (warn) {
-      log.info('not all images have been uplaoded, rerun this step.');
+      log.info('not all images have been uploaded, rerun this step.');
     }
+  });
+
+programCommand('verify_token_metadata')
+  .argument(
+    '<directory>',
+    'Directory containing images and metadata files named from 0-n',
+    val => {
+      return fs
+        .readdirSync(`${val}`)
+        .map(file => path.join(process.cwd(), val, file));
+    },
+  )
+  .option('-n, --number <number>', 'Number of images to upload')
+  .action((files: string[], options, cmd) => {
+    const { number } = cmd.opts();
+
+    const startMs = Date.now();
+    log.info('started at: ' + startMs.toString());
+    verifyTokenMetadata({ files, uploadElementsCount: number });
+
+    const endMs = Date.now();
+    const timeTaken = new Date(endMs - startMs).toISOString().substr(11, 8);
+    log.info(
+      `ended at: ${new Date(endMs).toString()}. time taken: ${timeTaken}`,
+    );
   });
 
 programCommand('verify').action(async (directory, cmd) => {
@@ -343,7 +372,11 @@ programCommand('show')
       //@ts-ignore
       log.info('wallet: ', machine.wallet.toBase58());
       //@ts-ignore
-      log.info('tokenMint: ', machine.tokenMint.toBase58());
+      log.info(
+        'tokenMint: ',
+        //@ts-ignore
+        machine.tokenMint ? machine.tokenMint.toBase58() : null,
+      );
       //@ts-ignore
       log.info('config: ', machine.config.toBase58());
       //@ts-ignore
@@ -369,7 +402,7 @@ programCommand('show')
     );
     log.info('...Config...');
     //@ts-ignore
-    log.info('authority: ', config.authority);
+    log.info('authority: ', config.authority.toBase58());
     //@ts-ignore
     log.info('symbol: ', config.data.symbol);
     //@ts-ignore
@@ -596,6 +629,56 @@ programCommand('sign_all')
       batchSizeParsed,
       daemon,
     );
+  });
+
+programCommand('generate_art_configurations')
+  .argument('<directory>', 'Directory containing traits named from 0-n', val =>
+    fs.readdirSync(`${val}`),
+  )
+  .action(async (files: string[]) => {
+    log.info('creating traits configuration file');
+    const startMs = Date.now();
+    const successful = await generateConfigurations(files);
+    const endMs = Date.now();
+    const timeTaken = new Date(endMs - startMs).toISOString().substr(11, 8);
+    if (successful) {
+      log.info('traits-configuration.json has been created!');
+      log.info(
+        `ended at: ${new Date(endMs).toISOString()}. time taken: ${timeTaken}`,
+      );
+    } else {
+      log.info('The art configuration file was not created');
+    }
+  });
+
+programCommand('create_generative_art')
+  .option(
+    '-n, --number-of-images <string>',
+    'Number of images to be generated',
+    '100',
+  )
+  .option(
+    '-c, --config-location <string>',
+    'Location of the traits configuration file',
+    './traits-configuration.json',
+  )
+  .action(async (directory, cmd) => {
+    const { numberOfImages, configLocation } = cmd.opts();
+
+    log.info('Loaded configuration file');
+
+    // 1. generate the metadata json files
+    const randomSets = await createMetadataFiles(
+      numberOfImages,
+      configLocation,
+    );
+
+    log.info('JSON files have been created within the assets directory');
+
+    // 2. piecemeal generate the images
+    await createGenerativeArt(configLocation, randomSets);
+
+    log.info('Images have been created successfully!');
   });
 
 function programCommand(name: string) {
