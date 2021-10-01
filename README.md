@@ -125,3 +125,64 @@ Tag each collaborator, set custom percentages, and you’re off to the races. Ea
 Metaplex's off-chain component allows creators to launch a custom storefront, similar to Shopify or WordPress. This open-source project provides a graphical interface to the on-chain Metaplex program, for creators, buyers, and curators of NFTs. The design and layout of storefronts can be customized to suit the needs of the entity creating it, either as a permanent storefront or an auction hub for a specific auction or collection.
 
 All identification on the Storefront is based on wallet addresses. Creators and store admins sign through their wallets, and users place bids from connected wallets. Custom storefronts allow creators to create unique experiences per auction. Additionally, the Metaplex Foundation is working on multiple partnerships that will enable building immersive storefronts using VR/AR.
+
+
+
+### Added by me
+#### Commands
+`ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts`
+`ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts upload ./assets --env devnet --keypair ~/.config/solana/devnet.json`
+`ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts verify --env devnet --keypair ~/.config/solana/devnet.json`
+
+`ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts verify_token_metadata ./assets --env devnet --keypair ~/.config/solana/devnet.json`
+
+`ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts create_candy_machine --env devnet --keypair ~/.config/solana/devnet.json --price 1 --sol-treasury-account 7WQEbdkSYPUrYc8aUuyKH6ADpEpDJo4ryx9sZGbMfQqr`
+
+`ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts update_candy_machine --env devnet --keypair ~/.config/solana/devnet.json --price 1 --date "01 Oct 2021 16:12:00 GMT"`
+#### Output
+```
+➜  cli git:(master) ✗ solana-keygen new --outfile ~/.config/solana/devnet.json
+Generating a new keypair
+
+For added security, enter a BIP39 passphrase
+
+NOTE! This passphrase improves security of the recovery seed phrase NOT the
+keypair file itself, which is stored as insecure plain text
+
+BIP39 Passphrase (empty for none): 
+
+Wrote new keypair to /Users/kristjangrm/.config/solana/devnet.json
+=======================================================================
+pubkey: 7WQEbdkSYPUrYc8aUuyKH6ADpEpDJo4ryx9sZGbMfQqr
+=======================================================================
+Save this seed phrase and your BIP39 passphrase to recover your new keypair:
+you pink pottery foil switch raw rate night awkward rabbit client jeans
+=======================================================================
+```
+
+```
+➜  cli git:(master) ✗ ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts upload ./assets --env devnet --keypair ~/.config/solana/devnet.json
+Beginning the upload for 2 (png+json) pairs
+started at: 1633100752102
+wallet public key: 7WQEbdkSYPUrYc8aUuyKH6ADpEpDJo4ryx9sZGbMfQqr
+Processing file: 0
+initializing config
+initialized config for a candy machine with publickey: DmEHajTUu66qNMLXGZdDXCmfk2Efpu5eSF2s1hcuHDfu
+Writing indices 0-1
+Done. Successful = true.
+ended at: 2021-10-01T15:06:36.637Z. time taken: 00:00:44
+```
+
+```
+➜  cli git:(master) ✗ ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts create_candy_machine --env devnet --keypair ~/.config/solana/devnet.json --price 1 --sol-treasury-account 7WQEbdkSYPUrYc8aUuyKH6ADpEpDJo4ryx9sZGbMfQqr
+wallet public key: 7WQEbdkSYPUrYc8aUuyKH6ADpEpDJo4ryx9sZGbMfQqr
+create_candy_machine finished. candy machine pubkey: EwUzW8yLWM1Wb2XRyMgMgDuwzXzR73bwmTVmXDtnzaQc
+```
+
+```
+➜  cli git:(master) ✗ ts-node /Users/kristjangrm/Code/github-com/metaplex/js/packages/cli/src/candy-machine-cli.ts update_candy_machine --env devnet --keypair ~/.config/solana/devnet.json --price 1 --date "01 Oct 2021 16:12:00 GMT"
+wallet public key: 7WQEbdkSYPUrYc8aUuyKH6ADpEpDJo4ryx9sZGbMfQqr
+ - updated startDate timestamp: 1633104720 (01 Oct 2021 16:12:00 GMT)
+ - updated price: 1000000000 lamports (1 SOL)
+updated_candy_machine finished 2kkKhMRndXLmPngNVn8iyusphCZYHpCPMXn7EyHtna6Xwp887cFLyPxYSd5N4EGpS7mv5nTuR5WHLvCwvmRDNV7y
+```
